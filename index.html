@@ -49,7 +49,7 @@ Editable Block - JS Source code - layoutItems[0] -->
       props: ["layoutThings", "questionName"],
       data: function() {
         return {
-          answer: "",
+          answer: {jsonFeedback:'',htmlFeedback:'',textFeedback:'',isComplete:false},
           layoutItems: this.layoutThings,
           isHidden: true,
           submitText: "Submit",
@@ -69,9 +69,9 @@ Editable Block - JS Source code - layoutItems[0] -->
         postContents: function() {
           // comment: leaving the gatewayUrl empty - API will post back to itself
           const gatewayUrl = "";
-          this.submitText = "Loading...";
-          this.answer = "";
-          this.isHidden = true;
+          this.$set(this, 'submitText', 'Loading...');
+          this.$set(this, 'answer', {jsonFeedback:'',htmlFeedback:'',textFeedback:'',isComplete:false});
+          this.$set(this, 'isHidden', true);
           fetch(gatewayUrl, {
             method: "POST",
             headers: {
@@ -89,15 +89,16 @@ Editable Block - JS Source code - layoutItems[0] -->
               return response.json();
             })
             .then(data => {
-              this.answer = JSON.parse(JSON.stringify(data));
-              this.answer.jsonFeedback = JSON.stringify(data.jsonFeedback, null, 2);
-              this.isHidden = false;
-              this.submitText = "Submit";
-              if (this.answer && this.answer.isComplete) {
-                this.isCorrectColor = "green";
-              } else {
-                this.isCorrectColor = "#ff5252";
-              }
+              let temp = JSON.parse(JSON.stringify(data));
+              temp.jsonFeedback = JSON.stringify(temp.jsonFeedback,null,2);
+              this.$set(this, 'answer', temp);
+              this.$set(this, 'isHidden', false);
+              this.$set(this, 'submitText', 'Submit');
+                if (this.answer && this.answer.isComplete) {
+                  this.$set(this, 'isCorrectColor', 'green');
+                } else {
+                  this.$set(this, 'isCorrectColor', '#ff5252');
+                }
               return this.$emit("questionhandler", {
                 data,
                 questionName: this.questionName
